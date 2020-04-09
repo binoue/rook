@@ -53,7 +53,7 @@ pspEnable: true
 
 ## If true, create namespace resource for a ceph cluster.
 ##
-namespaceDivisionEnable: true
+namespaceDivisionEnable: false
 
 ## Settings for whether to disable the drivers or other daemons if they are not
 ## needed

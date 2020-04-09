@@ -2,5 +2,12 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{  .Values.clusterNamespace |  default .Release.Namespace }}
+  name: {{  .Values.clusterNamespace }}
+{{- end }}
+
+{{- if (ne .Release.Namespace  "default") }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{  .Release.Namespace }}
 {{- end }}
