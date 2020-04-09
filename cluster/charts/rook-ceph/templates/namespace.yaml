@@ -1,0 +1,6 @@
+{{- if .Values.namespaceDivisionEnable }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{  .Values.clusterNamespace |  default .Release.Namespace }}
+{{- end }}

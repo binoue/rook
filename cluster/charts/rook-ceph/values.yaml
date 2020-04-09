@@ -51,6 +51,10 @@ rbacEnable: true
 ##
 pspEnable: true
 
+## If true, create namespace resource for a ceph cluster.
+##
+namespaceDivisionEnable: true
+
 ## Settings for whether to disable the drivers or other daemons if they are not
 ## needed
 csi:
@@ -165,3 +169,4 @@ discoverDaemonUdev:
 # imagePullSecrets option allow to pull docker images from private docker registry. Option will be passed to all service accounts.
 # imagePullSecrets:
 # - name: my-registry-secret
+clusterNamespace: 
