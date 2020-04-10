@@ -11,20 +11,29 @@ metadata:
 rules:
 - apiGroups:
   - ""
-  - apps
-  - extensions
   resources:
   - pods
   - configmaps
   - services
-  - daemonsets
-  - statefulsets
-  - deployment
   verbs:
   - get
   - list
   - watch
   - patch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - apps
+  - extensions
+  resources:
+  - daemonsets
+  - statefulsets
+  - deployments
+  verbs:
+  - get
+  - list
+  - watch
   - create
   - update
   - delete
