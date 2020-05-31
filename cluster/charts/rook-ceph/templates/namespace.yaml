@@ -1,0 +1,5 @@
+{{- range .Values.clusterNamespaces }}
+kind: Namespace
+metadata:
+  name: {{ . }}
+{{- end }}

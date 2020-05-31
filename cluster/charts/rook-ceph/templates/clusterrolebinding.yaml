@@ -1,3 +1,8 @@
+{{- $clusterNamespaces := .Values.clusterNamespaces}}
+{{ if not .Values.clusterNamespaces }}
+    {{- $clusterNamespaces = list .Release.Namespace }}
+{{- end -}}
+
 {{- if .Values.rbacEnable }}
 # Grant the rook system daemons cluster-wide access to manage the Rook CRDs, PVCs, and storage classes
 kind: ClusterRoleBinding
@@ -18,6 +23,7 @@ subjects:
   namespace: {{ .Release.Namespace }}
 ---
 # Allow the ceph mgr to access cluster-wide resources necessary for the mgr modules
+{{- range  $_, $n := $clusterNamespaces }}
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -29,9 +35,11 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: rook-ceph-mgr
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $n }}
+{{- end }}
 ---
 # Allow the ceph osd to access cluster-wide resources necessary for determining their topology location
+{{- range $_, $n := $clusterNamespaces }}
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -43,7 +51,8 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: rook-ceph-osd
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $n }}
+{{- end }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -71,6 +80,7 @@ roleRef:
   name: cephfs-csi-nodeplugin
   apiGroup: rbac.authorization.k8s.io
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -78,12 +88,14 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: rook-csi-cephfs-provisioner-sa
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
 roleRef:
   kind: ClusterRole
   name: cephfs-external-provisioner-runner
   apiGroup: rbac.authorization.k8s.io
+{{- end }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -91,11 +103,12 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: rook-csi-rbd-provisioner-sa
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
 roleRef:
   kind: ClusterRole
   name: rbd-external-provisioner-runner
   apiGroup: rbac.authorization.k8s.io
+{{- end }}
 
 {{- if .Values.pspEnable }}
 ---
@@ -116,15 +129,16 @@ subjects:
     name: rook-ceph-system
     namespace: {{ .Release.Namespace }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: rook-ceph-default-psp
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     operator: rook
     storage-backend: ceph
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    chart: "{{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -132,7 +146,8 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: default
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -151,6 +166,7 @@ subjects:
   name: rook-ceph-system
   namespace: {{ .Release.Namespace }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -162,7 +178,8 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: rook-csi-cephfs-provisioner-sa
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -177,6 +194,7 @@ subjects:
     name: rook-csi-cephfs-plugin-sa
     namespace: {{ .Release.Namespace }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -188,8 +206,10 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: rook-csi-rbd-plugin-sa
-    namespace: {{ .Release.Namespace }}
+    namespace:  {{ $n }}
+{{- end }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -201,8 +221,10 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: rook-csi-rbd-provisioner-sa
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
+{{- end }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -210,17 +232,19 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: rook-csi-rbd-plugin-sa
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
 roleRef:
   kind: ClusterRole
   name: rbd-csi-nodeplugin
   apiGroup: rbac.authorization.k8s.io
+{{- end }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: rook-ceph-osd-psp
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $n }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -228,13 +252,15 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: rook-ceph-osd
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
+{{- end }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: rook-ceph-mgr-psp
-  namespace: {{ .Release.Namespace }}
+  namespace:  {{ $n }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -242,13 +268,15 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: rook-ceph-mgr
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
+{{- end }}
 ---
+{{- range  $_, $n := $clusterNamespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: rook-ceph-cmd-reporter-psp
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $n }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -256,6 +284,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: rook-ceph-cmd-reporter
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ $n }}
+{{- end }}
 {{- end }}
 {{- end }}
