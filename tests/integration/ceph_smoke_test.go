@@ -80,7 +80,8 @@ type SmokeSuite struct {
 func (suite *SmokeSuite) SetupSuite() {
 	suite.namespace = "smoke-ns"
 	smokeTestCluster := TestCluster{
-		namespace:               suite.namespace,
+		operatorNamespace:       suite.namespace,
+		clusterNamespaces:       []string{suite.namespace},
 		storeType:               "bluestore",
 		storageClassName:        "",
 		useHelm:                 false,
@@ -121,7 +122,8 @@ func (suite *SmokeSuite) TestObjectStorage_SmokeTest() {
 
 // Test to make sure all rook components are installed and Running
 func (suite *SmokeSuite) TestARookClusterInstallation_SmokeTest() {
-	checkIfRookClusterIsInstalled(suite.Suite, suite.k8sh, installer.SystemNamespace(suite.namespace), suite.namespace, 3)
+	clusterNamespaces := []string{suite.namespace}
+	checkIfRookClusterIsInstalled(suite.Suite, suite.k8sh, installer.SystemNamespace(suite.namespace), clusterNamespaces, 3)
 }
 
 // Smoke Test for Mon failover - Test check the following operations for the Mon failover in order
