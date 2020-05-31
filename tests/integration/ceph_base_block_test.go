@@ -196,17 +196,19 @@ func restartOSDPods(k8sh *utils.K8sHelper, s suite.Suite, namespace string) {
 	assert.NoError(s.T(), err)
 }
 
-func runBlockCSITestLite(helper *clients.TestClient, k8sh *utils.K8sHelper, s suite.Suite, clusterNamespace, systemNamespace string, version cephv1.CephVersionSpec) {
+func runBlockCSITestLite(helper *clients.TestClient, k8sh *utils.K8sHelper, s suite.Suite, clusterNamespaces []string, systemNamespace string, version cephv1.CephVersionSpec) {
 	checkSkipCSITest(s.T(), k8sh)
 
-	logger.Infof("Block Storage End to End Integration Test - create storageclass,pool and pvc")
-	logger.Infof("Running on Rook Cluster %s", clusterNamespace)
-	poolName := "rookpool"
-	storageClassName := "rook-ceph-block-lite"
-	blockName := "test-block-claim-lite"
-	podName := "test-pod-lite"
-	defer blockTestDataCleanUp(helper, k8sh, s, clusterNamespace, poolName, storageClassName, blockName, podName, true)
-	setupBlockLite(helper, k8sh, s, clusterNamespace, systemNamespace, poolName, storageClassName, blockName, podName, version)
+	for _, clusterNamespace := range clusterNamespaces {
+		logger.Infof("Block Storage End to End Integration Test - create storageclass,pool and pvc")
+		logger.Infof("Running on Rook Cluster %s", clusterNamespace)
+		poolName := "rookpool"
+		storageClassName := "rook-ceph-block-lite"
+		blockName := "test-block-claim-lite"
+		podName := "test-pod-lite"
+		defer blockTestDataCleanUp(helper, k8sh, s, clusterNamespace, poolName, storageClassName, blockName, podName, true)
+		setupBlockLite(helper, k8sh, s, clusterNamespace, systemNamespace, poolName, storageClassName, blockName, podName, version)
+	}
 }
 
 func setupBlockLite(helper *clients.TestClient, k8sh *utils.K8sHelper, s suite.Suite,
