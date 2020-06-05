@@ -53,18 +53,20 @@ var (
 )
 
 // Test to make sure all rook components are installed and Running
-func checkIfRookClusterIsInstalled(s suite.Suite, k8sh *utils.K8sHelper, opNamespace, clusterNamespace string, mons int) {
-	logger.Infof("Make sure all Pods in Rook Cluster %s are running", clusterNamespace)
-	assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-operator", opNamespace, 1, "Running"),
-		"Make sure there is 1 rook-operator present in Running state")
-	assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-mgr", clusterNamespace, 1, "Running"),
-		"Make sure there is 1 rook-ceph-mgr present in Running state")
-	assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-osd", clusterNamespace, 1, "Running"),
-		"Make sure there is at lest 1 rook-ceph-osd present in Running state")
-	assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-mon", clusterNamespace, mons, "Running"),
-		fmt.Sprintf("Make sure there are %d rook-ceph-mon present in Running state", mons))
-	assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-crashcollector", clusterNamespace, 1, "Running"),
-		"Make sure there is at lest 1 rook-ceph-crash present in Running state")
+func checkIfRookClusterIsInstalled(s suite.Suite, k8sh *utils.K8sHelper, opNamespace string, clusterNamespaces []string, mons int) {
+	for _, cn := range clusterNamespaces {
+		logger.Infof("Make sure all Pods in Rook Cluster %s are running", cn)
+		assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-operator", opNamespace, 1, "Running"),
+			"Make sure there is 1 rook-operator present in Running state")
+		assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-mgr", cn, 1, "Running"),
+			"Make sure there is 1 rook-ceph-mgr present in Running state")
+		assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-osd", cn, 1, "Running"),
+			"Make sure there is at lest 1 rook-ceph-osd present in Running state")
+		assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-mon", cn, mons, "Running"),
+			fmt.Sprintf("Make sure there are %d rook-ceph-mon present in Running state", mons))
+		assert.True(s.T(), k8sh.CheckPodCountAndState("rook-ceph-crashcollector", cn, 1, "Running"),
+			"Make sure there is at lest 1 rook-ceph-crash present in Running state")
+	}
 }
 
 func checkIfRookClusterIsHealthy(s suite.Suite, testClient *clients.TestClient, clusterNamespace string) {
@@ -103,7 +105,8 @@ type TestCluster struct {
 	helper                  *clients.TestClient
 	T                       func() *testing.T
 	clusterName             string
-	namespace               string
+	operatorNamespace       string
+	clusterNamespaces       []string
 	storeType               string
 	storageClassName        string
 	useHelm                 bool
@@ -167,13 +170,13 @@ func (op *TestCluster) Setup() {
 	// Turn on DEBUG logging
 	capnslog.SetGlobalLogLevel(capnslog.DEBUG)
 
-	isRookInstalled, err := op.installer.InstallRook(op.namespace, op.storeType, op.usePVC, op.storageClassName,
+	isRookInstalled, err := op.installer.InstallRook(op.operatorNamespace, op.clusterNamespaces, op.storeType, op.usePVC, op.storageClassName,
 		cephv1.MonSpec{Count: op.mons, AllowMultiplePerNode: true}, false /* startWithAllNodes */, op.rbdMirrorWorkers, op.skipOSDCreation)
 
 	if !isRookInstalled || err != nil {
 		logger.Errorf("Rook was not installed successfully: %v", err)
 		if !op.installer.T().Failed() {
-			op.installer.GatherAllRookLogs(op.installer.T().Name(), op.namespace, installer.SystemNamespace(op.namespace))
+			op.installer.GatherAllRookLogs(op.installer.T().Name(), op.operatorNamespace, installer.SystemNamespace(op.operatorNamespace))
 		}
 		op.T().Fail()
 		op.Teardown()
@@ -186,5 +189,5 @@ func (op *TestCluster) SetInstallData(version string) {}
 
 // TearDownRook is a wrapper for tearDown after Suite
 func (op *TestCluster) Teardown() {
-	op.installer.UninstallRook(op.namespace)
+	op.installer.UninstallRook(op.operatorNamespace)
 }
