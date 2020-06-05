@@ -387,7 +387,7 @@ func (h *CephInstaller) GetNodeHostnames() ([]string, error) {
 }
 
 // InstallRook installs rook on k8s
-func (h *CephInstaller) InstallRook(namespace, storeType string, usePVC bool, storageClassName string,
+func (h *CephInstaller) InstallRook(operatorNamespace string, clusterNamespaces []string, storeType string, usePVC bool, storageClassName string,
 	mon cephv1.MonSpec, startWithAllNodes bool, rbdMirrorWorkers int, skipOSDCreation bool) (bool, error) {
 
 	var err error
@@ -396,20 +396,20 @@ func (h *CephInstaller) InstallRook(namespace, storeType string, usePVC bool, st
 	logger.Infof("Installing rook on k8s %s", k8sversion)
 
 	startDiscovery := true
-	onamespace := namespace
+	onamespace := operatorNamespace
 	// Create rook operator
 	if h.useHelm {
 		// disable the discovery daemonset with the helm chart
 		settings := "enableDiscoveryDaemon=false"
 		startDiscovery = false
-		err = h.CreateRookOperatorViaHelm(namespace, settings)
+		err = h.CreateRookOperatorViaHelm(onamespace, settings)
 		if err != nil {
 			logger.Errorf("Rook Operator not installed ,error -> %v", err)
 			return false, err
 
 		}
 	} else {
-		onamespace = SystemNamespace(namespace)
+		onamespace = SystemNamespace(onamespace)
 
 		err := h.CreateCephOperator(onamespace)
 		if err != nil {
@@ -425,12 +425,14 @@ func (h *CephInstaller) InstallRook(namespace, storeType string, usePVC bool, st
 	}
 
 	// Create rook cluster
-	err = h.CreateRookCluster(namespace, onamespace, storeType, usePVC, storageClassName,
-		cephv1.MonSpec{Count: mon.Count, AllowMultiplePerNode: mon.AllowMultiplePerNode}, startWithAllNodes,
-		skipOSDCreation, h.CephVersion)
-	if err != nil {
-		logger.Errorf("Rook cluster %s not installed, error -> %v", namespace, err)
-		return false, err
+	for _, namespace := range clusterNamespaces {
+		err = h.CreateRookCluster(namespace, onamespace, storeType, usePVC, storageClassName,
+			cephv1.MonSpec{Count: mon.Count, AllowMultiplePerNode: mon.AllowMultiplePerNode}, startWithAllNodes,
+			skipOSDCreation, h.CephVersion)
+		if err != nil {
+			logger.Errorf("Rook cluster %s not installed, error -> %v", namespace, err)
+			return false, err
+		}
 	}
 
 	discovery, err := h.k8shelper.Clientset.AppsV1().DaemonSets(onamespace).Get("rook-discover", metav1.GetOptions{})
@@ -443,12 +445,12 @@ func (h *CephInstaller) InstallRook(namespace, storeType string, usePVC bool, st
 	}
 
 	// Create rook client
-	err = h.CreateRookToolbox(namespace)
+	err = h.CreateRookToolbox(operatorNamespace)
 	if err != nil {
-		logger.Errorf("Rook toolbox in cluster %s not installed, error -> %v", namespace, err)
+		logger.Errorf("Rook toolbox in cluster %s not installed, error -> %v", operatorNamespace, err)
 		return false, err
 	}
-	logger.Infof("installed rook operator and cluster : %s on k8s %s", namespace, h.k8sVersion)
+	logger.Infof("installed rook operator and cluster : %s on k8s %s", operatorNamespace, h.k8sVersion)
 	return true, nil
 }
 

@@ -143,12 +143,14 @@ func cleanupFilesystem(helper *clients.TestClient, k8sh *utils.K8sHelper, s suit
 }
 
 // Test File System Creation on Rook that was installed on a custom namespace i.e. Namespace != "rook" and delete it again
-func runFileE2ETestLite(helper *clients.TestClient, k8sh *utils.K8sHelper, s suite.Suite, namespace string, filesystemName string) {
-	logger.Infof("File Storage End to End Integration Test - create Filesystem and make sure mds pod is running")
-	logger.Infof("Running on Rook Cluster %s", namespace)
-	activeCount := 1
-	createFilesystem(helper, k8sh, s, namespace, filesystemName, activeCount)
-	cleanupFilesystem(helper, k8sh, s, namespace, filesystemName)
+func runFileE2ETestLite(helper *clients.TestClient, k8sh *utils.K8sHelper, s suite.Suite, clusterNamespaces []string, filesystemName string) {
+	for _, cn := range clusterNamespaces {
+		logger.Infof("File Storage End to End Integration Test - create Filesystem and make sure mds pod is running")
+		logger.Infof("Running on Rook Cluster %s", cn)
+		activeCount := 1
+		createFilesystem(helper, k8sh, s, cn, filesystemName, activeCount)
+		cleanupFilesystem(helper, k8sh, s, cn, filesystemName)
+	}
 }
 
 func createFilesystem(helper *clients.TestClient, k8sh *utils.K8sHelper, s suite.Suite, namespace, filesystemName string, activeCount int) {

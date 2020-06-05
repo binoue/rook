@@ -111,7 +111,8 @@ func (mrc *MultiClusterDeploySuite) TearDownSuite() {
 // Test to make sure all rook components are installed and Running
 func (mrc *MultiClusterDeploySuite) TestInstallingMultipleRookClusters() {
 	// Check if Rook cluster 1 is deployed successfully
-	checkIfRookClusterIsInstalled(mrc.Suite, mrc.k8sh, installer.SystemNamespace(mrc.namespace1), mrc.namespace1, 1)
+	targetClusterNamespaces := []string{mrc.namespace1}
+	checkIfRookClusterIsInstalled(mrc.Suite, mrc.k8sh, installer.SystemNamespace(mrc.namespace1), targetClusterNamespaces, 1)
 	checkIfRookClusterIsHealthy(mrc.Suite, mrc.testClient, mrc.namespace1)
 
 	// Check if Rook external cluster is deployed successfully

@@ -323,6 +323,6 @@ discoverDaemonUdev:
 enableOBCWatchOperatorNamespace: true
 
 # clusterNamespaces option allowes to create necessary resources in order to create Ceph clusters in the specified namespaces.
-# clusterNamespaces:
-#  - cluster-namespace1
-#  - cluster-namespace2
+# clusterNamesspaces:
+# - cluster-ns1
+# - cluster-ns2
