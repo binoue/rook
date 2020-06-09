@@ -396,7 +396,8 @@ func (h *CephInstaller) InstallRook(operatorNamespace string, clusterNamespaces 
 	logger.Infof("Installing rook on k8s %s", k8sversion)
 
 	startDiscovery := true
-	onamespace := operatorNamespace
+	onamespace := SystemNamespace(operatorNamespace)
+
 	// Create rook operator
 	if h.useHelm {
 		// disable the discovery daemonset with the helm chart
@@ -406,11 +407,8 @@ func (h *CephInstaller) InstallRook(operatorNamespace string, clusterNamespaces 
 		if err != nil {
 			logger.Errorf("Rook Operator not installed ,error -> %v", err)
 			return false, err
-
 		}
 	} else {
-		onamespace = SystemNamespace(onamespace)
-
 		err := h.CreateCephOperator(onamespace)
 		if err != nil {
 			logger.Errorf("Rook Operator not installed ,error -> %v", err)

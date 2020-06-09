@@ -43,7 +43,7 @@ $(HELM_OUTPUT_DIR)/$(1)-$(VERSION).tgz: $(HELM) $(HELM_OUTPUT_DIR) $(shell find 
 	@echo === helm package $(1)
 	@cp -r $(HELM_CHARTS_DIR)/$(1) $(OUTPUT_DIR)
 	@$(SED_CMD) 's|VERSION|$(VERSION)|g' $(OUTPUT_DIR)/$(1)/values.yaml
-	@$(SED_CMD) 's|# clusterNamespaces:|clusterNamesspaces:|g' $(OUTPUT_DIR)/$(1)/values.yaml
+	@$(SED_CMD) 's|# clusterNamespaces:|clusterNamespaces:|g' $(OUTPUT_DIR)/$(1)/values.yaml
 	@$(SED_CMD) 's|#  - cluster-ns1|- cluster-ns1|g' $(OUTPUT_DIR)/$(1)/values.yaml
 	@$(SED_CMD) 's|#  - cluster-ns2|- cluster-ns2|g' $(OUTPUT_DIR)/$(1)/values.yaml
 	@$(HELM) lint $(abspath $(OUTPUT_DIR)/$(1))
