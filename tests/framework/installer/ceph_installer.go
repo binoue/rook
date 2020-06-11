@@ -964,7 +964,7 @@ spec:
 func (h *CephInstaller) addCleanupPolicy(namespace string) error {
 	cluster, err := h.k8shelper.RookClientset.CephV1().CephClusters(namespace).Get(h.clusterName, metav1.GetOptions{})
 	if err != nil {
-		return fmt.Errorf("failed to get ceph cluster. %+v", err)
+		return fmt.Errorf("failed to get ceph cluster in %v. %+v", namespace, err)
 	}
 	cluster.Spec.CleanupPolicy.Confirmation = cephv1.DeleteDataDirOnHostsConfirmation
 	_, err = h.k8shelper.RookClientset.CephV1().CephClusters(namespace).Update(cluster)
