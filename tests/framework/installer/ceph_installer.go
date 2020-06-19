@@ -133,9 +133,34 @@ func (h *CephInstaller) CreateRookOperatorViaHelm(namespace, chartSettings strin
 	err = h.helmHelper.InstallLocalRookHelmChart(helmChartName, helmDeployName, helmTag, namespace, chartSettings)
 	if err != nil {
 		return fmt.Errorf("failed to install rook operator via helm, err : %v", err)
-
 	}
 
+	time.Sleep(5 * time.Second)
+	logger.Infof("show resources in the operator ns")
+	r, err := h.k8shelper.Kubectl("-n", namespace, "get", "all")
+	if err != nil {
+		return err
+	}
+	logger.Infof("operator ns:%v has the resources: %v", namespace, r)
+	sa, err := h.k8shelper.Kubectl("-n", namespace, "get", "sa")
+	if err != nil {
+		return err
+	}
+	logger.Infof("operator ns:%v has the serviceaccounts: %v", namespace, sa)
+
+	logger.Infof("show resources in cluster ns")
+	for _, clusterNamespace := range []string{"cluster-ns1", "cluster-ns2"} {
+		r, err := h.k8shelper.Kubectl("-n", clusterNamespace, "get", "all")
+		if err != nil {
+			return err
+		}
+		logger.Infof("cluster ns:%v has the resources: %v", clusterNamespace, r)
+		sa, err := h.k8shelper.Kubectl("-n", clusterNamespace, "get", "sa")
+		if err != nil {
+			return err
+		}
+		logger.Infof("cluster ns:%v has the serviceaccounts: %v", clusterNamespace, sa)
+	}
 	if err = h.WipeDisks(namespace, 2); err != nil {
 		return err
 	}
@@ -429,6 +454,8 @@ func (h *CephInstaller) InstallRook(operatorNamespace string, clusterNamespaces 
 			skipOSDCreation, h.CephVersion)
 		if err != nil {
 			logger.Errorf("Rook cluster %s not installed, error -> %v", namespace, err)
+			resultlogs := h.k8shelper.DebugGetLogsFromNamespace(onamespace, "test-setup", testEnvName())
+			logger.Errorf("Rook cluster %s not installed, container logs -> %v", namespace, resultlogs)
 			return false, err
 		}
 	}
