@@ -1,6 +1,6 @@
 {{- $clusterNamespaces := .Values.clusterNamespaces}}
 {{ if not .Values.clusterNamespaces }}
-    {{- $clusterNamespaces = list .Release.Namespace }}
+   {{- $clusterNamespaces = list .Release.Namespace }}
 {{- end -}}
 
 {{- if .Values.rbacEnable }}
@@ -9,7 +9,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
   name: rook-ceph-system
-  namespace:  {{  .Release.Namespace }}
+  namespace: {{  .Release.Namespace }}
   labels:
     operator: rook
     storage-backend: ceph
@@ -54,7 +54,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: rook-ceph-osd
-  namespace:  {{ $clusterNamespace }}
+  namespace: {{ $clusterNamespace }}
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
@@ -71,7 +71,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: rook-ceph-mgr
-  namespace:  {{ $clusterNamespace }}
+  namespace: {{ $clusterNamespace }}
 rules:
 - apiGroups:
   - ""
@@ -109,7 +109,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: rook-ceph-cmd-reporter
-  namespace:  {{ $clusterNamespace }}
+  namespace: {{ $clusterNamespace }}
 rules:
 - apiGroups:
   - ""
