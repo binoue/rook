@@ -120,7 +120,7 @@ func (h *CephInstaller) CreateCephOperator(namespace string) (err error) {
 }
 
 // CreateRookOperatorViaHelm creates rook operator via Helm chart named local/rook present in local repo
-func (h *CephInstaller) CreateRookOperatorViaHelm(namespace, chartSettings string) error {
+func (h *CephInstaller) CreateRookOperatorViaHelm(namespace, chartSettings, clusterNamespaces string) error {
 	// creating clusterrolebinding for kubeadm env.
 	h.k8shelper.CreateAnonSystemClusterBinding()
 
@@ -130,7 +130,7 @@ func (h *CephInstaller) CreateRookOperatorViaHelm(namespace, chartSettings strin
 		return fmt.Errorf("Failed to get Version of helm chart %v, err : %v", helmChartName, err)
 	}
 
-	err = h.helmHelper.InstallLocalRookHelmChart(helmChartName, helmDeployName, helmTag, namespace, chartSettings)
+	err = h.helmHelper.InstallLocalRookHelmChart(helmChartName, helmDeployName, helmTag, namespace, chartSettings, clusterNamespaces)
 	if err != nil {
 		return fmt.Errorf("failed to install rook operator via helm, err : %v", err)
 	}
@@ -427,8 +427,9 @@ func (h *CephInstaller) InstallRook(operatorNamespace string, clusterNamespaces 
 	if h.useHelm {
 		// disable the discovery daemonset with the helm chart
 		settings := "enableDiscoveryDaemon=false"
+		clusterNamespaces := "clusterNamespaces[0]=cluster-ns1,clusterNamespaces[1]=cluster-ns2"
 		startDiscovery = false
-		err = h.CreateRookOperatorViaHelm(onamespace, settings)
+		err = h.CreateRookOperatorViaHelm(onamespace, settings, clusterNamespaces)
 		if err != nil {
 			logger.Errorf("Rook Operator not installed ,error -> %v", err)
 			return false, err
