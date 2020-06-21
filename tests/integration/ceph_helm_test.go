@@ -22,6 +22,7 @@ import (
 	"github.com/rook/rook/tests/framework/clients"
 	"github.com/rook/rook/tests/framework/installer"
 	"github.com/rook/rook/tests/framework/utils"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -61,33 +62,53 @@ type HelmSuite struct {
 	suite.Suite
 	helper            *clients.TestClient
 	kh                *utils.K8sHelper
-	op                *TestCluster
+	op                *MCTestOperations
 	operatorNamespace string
 	clusterNamespaces []string
+	namespace1        string
+	namespace2        string
+	poolName          string
+	testClient        *clients.TestClient
 	rookCephCleanup   bool
 }
 
 func (hs *HelmSuite) SetupSuite() {
-	hs.operatorNamespace = "helm-ns"
-	hs.clusterNamespaces = []string{"cluster-ns1", "cluster-ns2"}
-	helmTestCluster := TestCluster{
-		operatorNamespace:       hs.operatorNamespace,
-		clusterNamespaces:       hs.clusterNamespaces,
-		storeType:               "bluestore",
-		storageClassName:        "",
-		useHelm:                 true,
-		usePVC:                  false,
-		mons:                    1,
-		rbdMirrorWorkers:        1,
-		rookCephCleanup:         true,
-		skipOSDCreation:         false,
-		minimalMatrixK8sVersion: helmMinimalTestVersion,
-		rookVersion:             installer.VersionMaster,
-		cephVersion:             installer.NautilusVersion,
-	}
+	// hs.operatorNamespace = "helm-ns"
+	// hs.clusterNamespaces = []string{"cluster-ns1", "cluster-ns2"}
+	// helmTestCluster := TestCluster{
+	// 	operatorNamespace:       hs.operatorNamespace,
+	// 	clusterNamespaces:       hs.clusterNamespaces,
+	// 	storeType:               "bluestore",
+	// 	storageClassName:        "",
+	// 	useHelm:                 true,
+	// 	usePVC:                  false,
+	// 	mons:                    1,
+	// 	rbdMirrorWorkers:        1,
+	// 	rookCephCleanup:         true,
+	// 	skipOSDCreation:         false,
+	// 	minimalMatrixK8sVersion: helmMinimalTestVersion,
+	// 	rookVersion:             installer.VersionMaster,
+	// 	cephVersion:             installer.NautilusVersion,
+	// }
 
-	hs.op, hs.kh = StartTestCluster(hs.T, &helmTestCluster)
-	hs.helper = clients.CreateTestClient(hs.kh, hs.op.installer.Manifests)
+	// hs.op, hs.kh = StartTestCluster(hs.T, &helmTestCluster)
+	// hs.helper = clients.CreateTestClient(hs.kh, hs.op.installer.Manifests)
+
+	hs.operatorNamespace = "helm-ns"
+	hs.poolName = "multi-helm-cluster-pool1"
+	hs.namespace1 = "cluster-n1"
+	hs.namespace2 = "cluster-n2"
+
+	hs.op, hs.kh = NewMCTestOperations(hs.T, installer.SystemNamespace(hs.operatorNamespace), hs.namespace1, hs.namespace2, true)
+	hs.testClient = clients.CreateTestClient(hs.kh, hs.op.installer.Manifests)
+	hs.createPools()
+}
+
+func (hs *HelmSuite) createPools() {
+	// create a test pool in each cluster so that we get some PGs
+	logger.Infof("Creating pool %s", hs.poolName)
+	err := hs.testClient.PoolClient.Create(hs.poolName, hs.namespace1, 1)
+	require.Nil(hs.T(), err)
 }
 
 func (hs *HelmSuite) TearDownSuite() {
