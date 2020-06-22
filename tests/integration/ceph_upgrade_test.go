@@ -76,6 +76,7 @@ func (s *UpgradeSuite) SetupSuite() {
 		clusterName:             s.namespace,
 		operatorNamespace:       s.namespace,
 		clusterNamespaces:       []string{s.namespace},
+		devices:                 []string{""},
 		storeType:               "",
 		storageClassName:        "",
 		useHelm:                 false,

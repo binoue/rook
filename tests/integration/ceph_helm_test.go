@@ -64,15 +64,18 @@ type HelmSuite struct {
 	op                *TestCluster
 	operatorNamespace string
 	clusterNamespaces []string
+	devices           []string
 	rookCephCleanup   bool
 }
 
 func (hs *HelmSuite) SetupSuite() {
 	hs.operatorNamespace = "helm-ns"
 	hs.clusterNamespaces = []string{"cluster-ns1", "cluster-ns2"}
+	hs.devices = []string{"xvda", "xvdc"}
 	helmTestCluster := TestCluster{
 		operatorNamespace:       hs.operatorNamespace,
 		clusterNamespaces:       hs.clusterNamespaces,
+		devices:                 hs.devices,
 		storeType:               "bluestore",
 		storageClassName:        "",
 		useHelm:                 true,

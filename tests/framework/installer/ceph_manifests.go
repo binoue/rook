@@ -56,6 +56,7 @@ type CephManifests interface {
 type clusterSettings struct {
 	ClusterName      string
 	Namespace        string
+	Device           string
 	StoreType        string
 	DataDirHostPath  string
 	Mons             int
@@ -1954,6 +1955,40 @@ spec:
     osdMaintenanceTimeout: 30
     manageMachineDisruptionBudgets: false
     machineDisruptionBudgetNamespace: openshift-machine-api`
+	}
+
+	if settings.Device != "" {
+		return `apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: ` + settings.ClusterName + `
+  namespace: ` + settings.Namespace + `
+spec:
+  cephVersion:
+    image: ` + settings.CephVersion.Image + `
+    allowUnsupported: ` + strconv.FormatBool(settings.CephVersion.AllowUnsupported) + `
+  dataDirHostPath: ` + settings.DataDirHostPath + `
+  network:
+    hostNetwork: false
+  mon:
+    count: ` + strconv.Itoa(settings.Mons) + `
+    allowMultiplePerNode: true
+  dashboard:
+    enabled: true
+  skipUpgradeChecks: true
+  metadataDevice:
+  storage:
+    useAllNodes: ` + strconv.FormatBool(!settings.skipOSDCreation) + `
+    useAllDevices: ` + strconv.FormatBool(!settings.skipOSDCreation) + `
+    deviceFilter: ` + settings.Device + `
+    config:
+      ` + store + `
+      databaseSizeMB: "1024"
+      journalSizeMB: "1024"
+  mgr:
+    modules:
+    - name: pg_autoscaler
+      enabled: true`
 	}
 
 	return `apiVersion: ceph.rook.io/v1

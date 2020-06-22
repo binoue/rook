@@ -81,6 +81,7 @@ func (suite *SmokeSuite) SetupSuite() {
 	smokeTestCluster := TestCluster{
 		operatorNamespace:       suite.namespace,
 		clusterNamespaces:       []string{suite.namespace},
+		devices:                 []string{""},
 		storeType:               "bluestore",
 		storageClassName:        "",
 		useHelm:                 false,

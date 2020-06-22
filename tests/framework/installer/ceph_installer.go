@@ -200,15 +200,15 @@ func (h *CephInstaller) Execute(command string, parameters []string, namespace s
 }
 
 // CreateRookCluster creates rook cluster via kubectl
-func (h *CephInstaller) CreateRookCluster(namespace, systemNamespace, storeType string, usePVC bool, storageClassName string,
+func (h *CephInstaller) CreateRookCluster(namespace, systemNamespace, device string, storeType string, usePVC bool, storageClassName string,
 	mon cephv1.MonSpec, startWithAllNodes bool, skipOSDCreation bool, cephVersion cephv1.CephVersionSpec) error {
 
 	dataDirHostPath, err := h.initTestDir(namespace)
 	if err != nil {
 		return fmt.Errorf("failed to create test dir. %+v", err)
 	}
-	logger.Infof("Creating cluster: namespace=%s, systemNamespace=%s, storeType=%s, dataDirHostPath=%s, usePVC=%v, storageClassName=%s, startWithAllNodes=%t, mons=%+v",
-		namespace, systemNamespace, storeType, dataDirHostPath, usePVC, storageClassName, startWithAllNodes, mon)
+	logger.Infof("Creating cluster: namespace=%s, systemNamespace=%s, device=%s,storeType=%s, dataDirHostPath=%s, usePVC=%v, storageClassName=%s, startWithAllNodes=%t, mons=%+v",
+		namespace, systemNamespace, device, storeType, dataDirHostPath, usePVC, storageClassName, startWithAllNodes, mon)
 
 	logger.Infof("Creating namespace %s", namespace)
 	ns := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}
@@ -243,7 +243,7 @@ osd_pool_default_size = 1
 	}
 
 	logger.Infof("Starting Rook Cluster with yaml")
-	settings := &clusterSettings{h.clusterName, namespace, storeType, dataDirHostPath, mon.Count, 0, usePVC, storageClassName, skipOSDCreation, cephVersion}
+	settings := &clusterSettings{h.clusterName, namespace, device, storeType, dataDirHostPath, mon.Count, 0, usePVC, storageClassName, skipOSDCreation, cephVersion}
 	rookCluster := h.Manifests.GetRookCluster(settings)
 	if _, err := h.k8shelper.KubectlWithStdin(rookCluster, createFromStdinArgs...); err != nil {
 		return fmt.Errorf("Failed to create rook cluster : %v ", err)
@@ -412,7 +412,7 @@ func (h *CephInstaller) GetNodeHostnames() ([]string, error) {
 }
 
 // InstallRook installs rook on k8s
-func (h *CephInstaller) InstallRook(operatorNamespace string, clusterNamespaces []string, storeType string, usePVC bool, storageClassName string,
+func (h *CephInstaller) InstallRook(operatorNamespace string, clusterNamespaces []string, devices []string, storeType string, usePVC bool, storageClassName string,
 	mon cephv1.MonSpec, startWithAllNodes bool, rbdMirrorWorkers int, skipOSDCreation bool) (bool, error) {
 
 	var err error
@@ -449,8 +449,8 @@ func (h *CephInstaller) InstallRook(operatorNamespace string, clusterNamespaces 
 	}
 
 	// Create rook cluster
-	for _, namespace := range clusterNamespaces {
-		err = h.CreateRookCluster(namespace, onamespace, storeType, usePVC, storageClassName,
+	for i, namespace := range clusterNamespaces {
+		err = h.CreateRookCluster(namespace, onamespace, devices[i], storeType, usePVC, storageClassName,
 			cephv1.MonSpec{Count: mon.Count, AllowMultiplePerNode: mon.AllowMultiplePerNode}, startWithAllNodes,
 			skipOSDCreation, h.CephVersion)
 		if err != nil {

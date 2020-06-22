@@ -85,6 +85,7 @@ func (s *CephFlexDriverSuite) SetupSuite() {
 	flexTestCluster := TestCluster{
 		operatorNamespace:       s.namespace,
 		clusterNamespaces:       []string{s.namespace},
+		devices:                 []string{""},
 		storeType:               "bluestore",
 		storageClassName:        "",
 		useHelm:                 false,

@@ -107,6 +107,7 @@ type TestCluster struct {
 	clusterName             string
 	operatorNamespace       string
 	clusterNamespaces       []string
+	devices                 []string
 	storeType               string
 	storageClassName        string
 	useHelm                 bool
@@ -170,7 +171,7 @@ func (op *TestCluster) Setup() {
 	// Turn on DEBUG logging
 	capnslog.SetGlobalLogLevel(capnslog.DEBUG)
 
-	isRookInstalled, err := op.installer.InstallRook(op.operatorNamespace, op.clusterNamespaces, op.storeType, op.usePVC, op.storageClassName,
+	isRookInstalled, err := op.installer.InstallRook(op.operatorNamespace, op.clusterNamespaces, op.devices, op.storeType, op.usePVC, op.storageClassName,
 		cephv1.MonSpec{Count: op.mons, AllowMultiplePerNode: true}, false /* startWithAllNodes */, op.rbdMirrorWorkers, op.skipOSDCreation)
 
 	if !isRookInstalled || err != nil {

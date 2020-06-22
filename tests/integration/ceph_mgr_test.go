@@ -92,6 +92,7 @@ func (suite *CephMgrSuite) SetupSuite() {
 		clusterName:             suite.namespace,
 		operatorNamespace:       suite.namespace,
 		clusterNamespaces:       []string{suite.namespace},
+		devices:                 []string{""},
 		storeType:               "bluestore",
 		storageClassName:        "",
 		useHelm:                 false,
