@@ -96,10 +96,10 @@ func (hs *HelmSuite) SetupSuite() {
 
 	hs.operatorNamespace = "helm-ns"
 	hs.poolName = "multi-helm-cluster-pool1"
-	hs.namespace1 = "cluster-n1"
-	hs.namespace2 = "cluster-n2"
+	hs.namespace1 = "cluster-ns1"
+	hs.namespace2 = "cluster-ns2"
 
-	hs.op, hs.kh = NewMCTestOperations(hs.T, installer.SystemNamespace(hs.operatorNamespace), hs.namespace1, hs.namespace2, true)
+	hs.op, hs.kh = NewMCTestOperations(hs.T, installer.SystemNamespace(hs.operatorNamespace), hs.namespace1, hs.namespace2, true, false)
 	hs.testClient = clients.CreateTestClient(hs.kh, hs.op.installer.Manifests)
 	hs.createPools()
 }

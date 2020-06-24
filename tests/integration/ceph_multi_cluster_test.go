@@ -80,7 +80,7 @@ func (mrc *MultiClusterDeploySuite) SetupSuite() {
 	mrc.namespace1 = "mrc-n1"
 	mrc.namespace2 = "mrc-n2"
 
-	mrc.op, mrc.k8sh = NewMCTestOperations(mrc.T, installer.SystemNamespace(mrc.namespace1), mrc.namespace1, mrc.namespace2, false)
+	mrc.op, mrc.k8sh = NewMCTestOperations(mrc.T, installer.SystemNamespace(mrc.namespace1), mrc.namespace1, mrc.namespace2, false, true)
 	mrc.testClient = clients.CreateTestClient(mrc.k8sh, mrc.op.installer.Manifests)
 	mrc.createPools()
 }
@@ -134,11 +134,12 @@ type MCTestOperations struct {
 	storageClassName string
 	testOverPVC      bool
 	// This value is not necessary
-	useHelm bool
+	useHelm         bool
+	externalCluster bool
 }
 
 // NewMCTestOperations creates new instance of TestCluster struct
-func NewMCTestOperations(t func() *testing.T, systemNamespace string, namespace1 string, namespace2 string, useHelm bool) (*MCTestOperations, *utils.K8sHelper) {
+func NewMCTestOperations(t func() *testing.T, systemNamespace string, namespace1 string, namespace2 string, useHelm bool, useExternalCluster bool) (*MCTestOperations, *utils.K8sHelper) {
 
 	kh, err := utils.CreateK8sHelper(t)
 	require.NoError(t(), err)
@@ -157,6 +158,7 @@ func NewMCTestOperations(t func() *testing.T, systemNamespace string, namespace1
 		storageClassName: "",
 		testOverPVC:      false,
 		useHelm:          useHelm,
+		externalCluster:  useExternalCluster,
 	}
 
 	if kh.VersionAtLeast("v1.13.0") {
@@ -212,9 +214,16 @@ func (o MCTestOperations) Setup() {
 	require.True(o.T(), o.kh.IsPodInExpectedState("rook-ceph-mon", o.namespace1, "Running"),
 		"Make sure rook-ceph-mon is in running state")
 
-	// create an external cluster
-	err = o.startExternalCluster(o.namespace2)
-	require.NoError(o.T(), err)
+	if o.externalCluster {
+		// create an external cluster
+		err = o.startExternalCluster(o.namespace2)
+		require.NoError(o.T(), err)
+	} else {
+		err = o.startCluster(o.namespace2, "bluestore")
+		require.NoError(o.T(), err)
+		require.True(o.T(), o.kh.IsPodInExpectedState("rook-ceph-mon", o.namespace2, "Running"),
+			"Make sure rook-ceph-mon is in running state")
+	}
 
 	logger.Infof("finished starting clusters")
 }
