@@ -19,7 +19,6 @@ package utils
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/rook/rook/pkg/util/exec"
 	"github.com/rook/rook/pkg/util/sys"
@@ -91,8 +90,6 @@ func (h *HelmHelper) InstallLocalRookHelmChart(chartName string, deployName stri
 
 	result, err = h.Execute(cmdArgs...)
 	if err == nil {
-		logger.Infof("helm install result %s", result)
-		time.Sleep(5)
 		return nil
 	}
 
