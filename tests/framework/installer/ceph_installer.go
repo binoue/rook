@@ -899,6 +899,9 @@ spec:
                       block=` + TestScratchDevice() + `
                       wipefs --all "$block"
                       dd if=/dev/zero of="$block" bs=1M count=100 oflag=direct,dsync
+                      block=` + TestScratchDevice2() + `
+                      wipefs --all "$block"
+                      dd if=/dev/zero of="$block" bs=1M count=100 oflag=direct,dsync
                       set -Ee
                       # Useful debug commands
                       lsblk

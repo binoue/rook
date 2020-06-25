@@ -112,7 +112,18 @@ func (hs *HelmSuite) createPools() {
 }
 
 func (hs *HelmSuite) TearDownSuite() {
+	hs.deletePools()
 	hs.op.Teardown()
+}
+
+func (hs *HelmSuite) deletePools() {
+	// create a test pool in each cluster so that we get some PGs
+	logger.Infof("Deleting pool %s", hs.poolName)
+	if err := hs.testClient.PoolClient.DeletePool(hs.testClient.BlockClient, hs.namespace1, hs.poolName); err != nil {
+		logger.Errorf("failed to delete pool %q. %v", hs.poolName, err)
+	} else {
+		logger.Infof("deleted pool %q", hs.poolName)
+	}
 }
 
 func (hs *HelmSuite) AfterTest(suiteName, testName string) {

@@ -173,7 +173,7 @@ func NewMCTestOperations(t func() *testing.T, systemNamespace string, namespace1
 func (o MCTestOperations) Setup() {
 	var err error
 	if o.testOverPVC {
-		cmdArgs := utils.CommandArgs{Command: localPathPVCmd, CmdArgs: []string{installer.TestScratchDevice()}}
+		cmdArgs := utils.CommandArgs{Command: localPathPVCmd, CmdArgs: []string{installer.TestScratchDevice(), installer.TestScratchDevice2()}}
 		cmdOut := utils.ExecuteCommand(cmdArgs)
 		require.NoError(o.T(), cmdOut.Err)
 	}
