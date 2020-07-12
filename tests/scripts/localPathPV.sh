@@ -9,6 +9,10 @@ if [ $# -ge 2 ] ; then
   test_scratch_device2=$2
 fi
 
+df -h
+
+lsblk
+
 if [ ! -b "${test_scratch_device}" ] ; then
   echo "invalid scratch device name: ${test_scratch_device}" >&2
   exit 1
