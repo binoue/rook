@@ -57,12 +57,12 @@ func baseTestDir() string {
 
 // TestScratchDevice get the scratch device to be used for OSD
 func TestScratchDevice() string {
-	return getEnvVarWithDefault("TEST_SCRATCH_DEVICE", "/dev/xvdc")
+	return getEnvVarWithDefault("TEST_SCRATCH_DEVICE", "/dev/xvdb")
 }
 
 // TestScratchDevice2 get the second scratch device to be used for OSD
 func TestScratchDevice2() string {
-	return getEnvVarWithDefault("TEST_SCRATCH_DEVICE2", "/dev/xvdb")
+	return getEnvVarWithDefault("TEST_SCRATCH_DEVICE2", "/dev/xvdc")
 }
 
 func getEnvVarWithDefault(env, defaultValue string) string {
