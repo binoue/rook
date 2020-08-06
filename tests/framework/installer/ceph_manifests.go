@@ -1886,6 +1886,7 @@ spec:
   crashCollector:
     disable: false
   storage:
+    useAllNodes: true
     storageClassDeviceSets:
     - name: set1
       count: 1
