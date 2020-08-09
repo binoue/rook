@@ -18,6 +18,9 @@ if [ ! -b "${test_scratch_device2}" ] ; then
   exit 1
 fi
 
+sudo dd if=/dev/zero of="$test_scratch_device" bs=1M oflag=direct
+sudo dd if=/dev/zero of="$test_scratch_device2" bs=1M oflag=direct
+
 lsblk
 
 sudo rm -rf /var/lib/rook/rook-integration-test
