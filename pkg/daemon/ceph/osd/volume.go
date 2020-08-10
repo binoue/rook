@@ -316,7 +316,7 @@ func (a *OsdAgent) initializeBlockPVC(context *clusterd.Context, devices *Device
 				}
 
 				// Return failure
-				return "", "", errors.Wrap(err, "failed ceph-volume") // fail return here as validation provided by ceph-volume
+				return "", "", errors.Wrap(err, "failed ceph-volume "+op) // fail return here as validation provided by ceph-volume
 			}
 			logger.Infof("%v", op)
 			// if raw mode is used or PV on LV, let's return the path of the device
@@ -705,7 +705,7 @@ func GetCephVolumeRawOSDs(context *clusterd.Context, clusterInfo *client.Cluster
 
 	result, err := context.Executor.ExecuteCommandWithOutput(cephVolumeCmd, cvMode, "list", block, "--format", "json")
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to retrieve ceph-volume %s list results", cvMode)
+		return nil, errors.Wrapf(err, "failed to retrieve ceph-volume %s list results, %s", cvMode, result)
 	}
 	logger.Infof("Execute %s %s list %s --format json:  %v", cephVolumeCmd, cvMode, block, result)
 	debug, err := context.Executor.ExecuteCommandWithOutput(cephVolumeCmd, "--log-level", "10", cvMode, "list", block)
