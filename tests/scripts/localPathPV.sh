@@ -23,7 +23,7 @@ sudo dd if=/dev/zero of="$test_scratch_device2" bs=1M count=100 oflag=direct
 
 lsblk
 
-sudo rm -rf /var/lib/rook/*
+sudo rm -rf /var/lib/rook/rook-integration-test
 sudo mkdir -p /var/lib/rook/rook-integration-test/mon1 /var/lib/rook/rook-integration-test/mon2 /var/lib/rook/rook-integration-test/mon3
 
 node_name=$(kubectl get nodes -o jsonpath={.items[*].metadata.name})
