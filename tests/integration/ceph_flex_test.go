@@ -80,6 +80,9 @@ type CephFlexDriverSuite struct {
 
 func (s *CephFlexDriverSuite) SetupSuite() {
 
+	// debugging code
+	cleanupAll()
+
 	s.namespace = "flex-ns"
 	s.pvcNameRWO = "block-persistent-rwo"
 	s.pvcNameRWX = "block-persistent-rwx"
@@ -412,4 +415,11 @@ spec:
       claimName: ` + blockName + `
       readOnly: ` + strconv.FormatBool(readOnly) + `
   restartPolicy: Never`
+}
+
+func cleanupAll() {
+	cleanupAllCmd := "tests/scripts/cleanupAll.sh"
+	cmdArgs := utils.CommandArgs{Command: cleanupAllCmd, CmdArgs: []string{installer.TestScratchDevice(), installer.TestScratchDevice2()}}
+	cmdOut := utils.ExecuteCommand(cmdArgs)
+	logger.Infof("cleanup all command result: stdout: %v, stderr: %v, exit code: %v", cmdOut.StdOut, cmdOut.StdErr, cmdOut.ExitCode)
 }

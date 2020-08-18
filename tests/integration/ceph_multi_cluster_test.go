@@ -172,6 +172,10 @@ func NewMCTestOperations(t func() *testing.T, systemNamespace string, namespace1
 
 // Setup is wrapper for setting up multiple rook clusters.
 func (o MCTestOperations) Setup() {
+
+	// debugging code
+	cleanupAll()
+
 	var err error
 	if o.testOverPVC {
 		cmdArgs := utils.CommandArgs{Command: localPathPVCmd, CmdArgs: []string{installer.TestScratchDevice(), installer.TestScratchDevice2()}}

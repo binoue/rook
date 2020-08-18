@@ -71,6 +71,10 @@ type HelmSuite struct {
 }
 
 func (hs *HelmSuite) SetupSuite() {
+
+	// debugging code
+	cleanupAll()
+
 	hs.operatorNamespace = "helm-ns"
 	hs.poolName = "multi-helm-cluster-pool1"
 	hs.clusterNamespaces = []string{"cluster-ns1", "cluster-ns2"}

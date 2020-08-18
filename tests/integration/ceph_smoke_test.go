@@ -79,6 +79,10 @@ type SmokeSuite struct {
 }
 
 func (suite *SmokeSuite) SetupSuite() {
+
+	// debugging code
+	cleanupAll()
+
 	suite.namespace = "smoke-ns"
 	smokeTestCluster := TestCluster{
 		operatorNamespace:       suite.namespace,
