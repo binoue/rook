@@ -111,7 +111,10 @@ func (p *PoolOperation) CephPoolExists(namespace, name string) (bool, error) {
 func (p *PoolOperation) DeletePool(blockClient *BlockOperation, clusterInfo *client.ClusterInfo, poolName string) error {
 	// Delete all the images in a pool
 	logger.Infof("listing images in pool %q", poolName)
-	blockImagesList, _ := blockClient.ListImagesInPool(clusterInfo, poolName)
+	blockImagesList, err := blockClient.ListImagesInPool(clusterInfo, poolName)
+	if err != nil {
+		logger.Infof("failed to retrieve block images. err: %v", err)
+	}
 	for _, blockImage := range blockImagesList {
 		logger.Infof("force deleting block image %q in pool %q", blockImage, poolName)
 		// Wait and retry up to 10 times/seconds to delete RBD images
@@ -128,7 +131,7 @@ func (p *PoolOperation) DeletePool(blockClient *BlockOperation, clusterInfo *cli
 	}
 
 	logger.Infof("deleting pool CR %q", poolName)
-	err := p.k8sh.RookClientset.CephV1().CephBlockPools(clusterInfo.Namespace).Delete(poolName, &metav1.DeleteOptions{})
+	err = p.k8sh.RookClientset.CephV1().CephBlockPools(clusterInfo.Namespace).Delete(poolName, &metav1.DeleteOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil

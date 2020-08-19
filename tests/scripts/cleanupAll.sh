@@ -6,7 +6,7 @@ echo "Check crds"
 kubectl get crd
 
 echo "Cleanup all crds if exist"
-kubectl delete crd
+kubectl delete crd --all
 
 echo "Check disks / lv / vg"
 test_scratch_device=/dev/xvdc
