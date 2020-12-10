@@ -105,6 +105,8 @@ func (c *Cluster) makeDeployment(mgrConfig *mgrConfig) (*apps.Deployment, error)
 
 	replicas := int32(1)
 
+	k8sutil.RemoveDuplicateEnvVars(&podSpec.Spec)
+
 	d := &apps.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      mgrConfig.ResourceName,
