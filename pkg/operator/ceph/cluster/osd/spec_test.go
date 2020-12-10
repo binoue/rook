@@ -28,6 +28,7 @@ import (
 	"github.com/rook/rook/pkg/operator/ceph/cluster/osd/config"
 	opconfig "github.com/rook/rook/pkg/operator/ceph/config"
 	cephver "github.com/rook/rook/pkg/operator/ceph/version"
+	"github.com/rook/rook/pkg/operator/k8sutil"
 	exectest "github.com/rook/rook/pkg/util/exec/test"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
@@ -63,7 +64,9 @@ func TestPodContainer(t *testing.T) {
 	assert.Equal(t, "ceph", container.Args[2])
 	assert.Equal(t, "osd", container.Args[3])
 	assert.Equal(t, "provision", container.Args[4])
-	findDuplicateEnvVars(t, c.Spec)
+
+	vars := k8sutil.FindDuplicateEnvVars(c.Spec)
+	assert.Equal(t, 0, len(vars))
 }
 
 func TestDaemonset(t *testing.T) {

@@ -410,3 +410,18 @@ func removeDuplicateEnvVarsFromContainer(container *v1.Container) {
 	}
 	container.Env = vars
 }
+
+func FindDuplicateEnvVars(pod v1.PodSpec) []string {
+	var duplicateEnvVars []string
+	for _, container := range pod.Containers {
+		envVars := map[string]string{}
+		for _, v := range container.Env {
+			_, ok := envVars[v.Name]
+			if ok {
+				duplicateEnvVars = append(duplicateEnvVars, v.Name)
+			}
+			envVars[v.Name] = v.Value
+		}
+	}
+	return duplicateEnvVars
+}

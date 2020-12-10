@@ -26,6 +26,7 @@ import (
 	"github.com/rook/rook/pkg/operator/ceph/config"
 	cephtest "github.com/rook/rook/pkg/operator/ceph/test"
 	cephver "github.com/rook/rook/pkg/operator/ceph/version"
+	"github.com/rook/rook/pkg/operator/k8sutil"
 	optest "github.com/rook/rook/pkg/operator/test"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
@@ -77,6 +78,8 @@ func TestPodSpec(t *testing.T) {
 		"my-priority-class")
 	assert.Equal(t, 2, len(d.Spec.Template.Annotations))
 
+	vars := k8sutil.FindDuplicateEnvVars(d.Spec.Template.Spec)
+	assert.Equal(t, 0, len(vars))
 }
 
 func TestServiceSpec(t *testing.T) {

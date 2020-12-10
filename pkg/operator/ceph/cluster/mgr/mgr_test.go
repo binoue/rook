@@ -28,6 +28,7 @@ import (
 	"github.com/rook/rook/pkg/clusterd"
 	cephclient "github.com/rook/rook/pkg/daemon/ceph/client"
 	cephver "github.com/rook/rook/pkg/operator/ceph/version"
+	"github.com/rook/rook/pkg/operator/k8sutil"
 	testopk8s "github.com/rook/rook/pkg/operator/k8sutil/test"
 	testop "github.com/rook/rook/pkg/operator/test"
 	exectest "github.com/rook/rook/pkg/util/exec/test"
@@ -109,6 +110,8 @@ func validateStart(ctx context.Context, t *testing.T, c *Cluster) {
 		assert.Equal(t, map[string]string{"my": "annotation"}, d.Spec.Template.Annotations)
 		assert.Contains(t, d.Spec.Template.Labels, "my-label-key")
 		assert.Equal(t, "my-priority-class", d.Spec.Template.Spec.PriorityClassName)
+		vars := k8sutil.FindDuplicateEnvVars(d.Spec.Template.Spec)
+		assert.Equal(t, 0, len(vars))
 	}
 
 	_, err := c.context.Clientset.CoreV1().Services(c.clusterInfo.Namespace).Get(ctx, "rook-ceph-mgr", metav1.GetOptions{})
